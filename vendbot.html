@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+<script type="text/javascript" src="http://cdn.robotwebtools.org/EventEmitter2/current/eventemitter2.min.js"></script>
+<script type="text/javascript" src="http://cdn.robotwebtools.org/roslibjs/current/roslib.min.js"></script>
+
+<script type="text/javascript" type="text/javascript">
+;
+$(function() {
+
+  var $stop_loop = false;
+
+  var $ros = new ROSLIB.Ros({
+    url : 'ws://localhost:9090'
+  });
+
+  $ros.on('connection', function() {
+    console.log('Connected to websocket server.');
+  });
+
+  $ros.on('error', function(error) {
+    console.log('Error connecting to websocket server: ', error);
+  });
+
+  $ros.on('close', function() {
+    console.log('Connection to websocket server closed.');
+  });
+
+  var $cmdVel = new ROSLIB.Topic({
+    ros : $ros,
+    name : '/cmd_vel',
+    messageType : 'geometry_msgs/Twist'
+  });
+
+  var $vend = new ROSLIB.Topic({
+    ros : $ros,
+    name : '/vend',
+    messageType : 'std_msgs/Bool'
+  });
+
+  var $mforward = new ROSLIB.Message({
+    linear : {
+      x : 0.05,
+      y : 0.0,
+      z : 0.0
+    },
+    angular : {
+      x : 0.0,
+      y : 0.0,
+      z : 0.0
+    }
+  });
+
+  var $tleft = new ROSLIB.Message({
+    linear : {
+      x : 0.0,
+      y : 90.0,
+      z : 0.0
+    },
+    angular : {
+      x : 0.0,
+      y : 0.0,
+      z : 0.0
+    }
+  });
+
+  var $tright = new ROSLIB.Message({
+    linear : {
+      x : 0.0,
+      y : -90.0,
+      z : 0.0
+    },
+    angular : {
+      x : 0.0,
+      y : 0.0,
+      z : 0.0
+    }
+  });
+
+  var $dovend = new ROSLIB.Message({
+    data : true,
+  });
+
+  $('#actions .move_forward').on('mousedown', function() {
+    while($stop_loop == false){
+      $cmdVel.publish($mforward);
+    }
+    $stop_loop = false;
+  });
+
+  $('#actions .turn_left').on('click', function() {
+    while($stop_loop == false){
+      $cmdVel.publish($tleft);
+    }
+    $stop_loop = false;
+  });
+  
+  $('#actions .turn_right').on('click', function() {
+    while($stop_loop == false){
+      $cmdVel.publish($tright);
+    }
+    $stop_loop = false;
+  });
+
+
+  $('#actions .move_forward').on('mouseup', function() {
+    $stop_loop = true;
+  });
+  $('#actions .move_forward').on('mouseleave', function() {
+    $stop_loop = true;
+  });
+  $('#actions .turn_left').off('click', function() {
+    $stop_loop = true;
+  });
+
+  $('#actions .turn_right').off('click', function() {
+    $stop_loop = true;
+  });
+
+  $('#actions .vend').on('click', function() {
+    $vend.publish($dovend);
+  });
+});
+</script>
+</head>
+
+<body>
+  <h1>VendBot</h1>
+  <div id='actions'>
+    <a href='#' class='move_forward'>Move Forward</a><br /><br />
+    <a href='#' class='turn_left'>Turn Left</a><br />
+    <a href='#' class='turn_right'>Turn Right</a><br /><br />
+    <a href='#' class='vend'>Vend</a>
+  </div>
+</body>
+</html>
+
