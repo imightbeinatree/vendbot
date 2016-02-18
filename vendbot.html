@@ -1,16 +1,30 @@
 <!DOCTYPE html>
 <html>
 <head>
+<title>VendBot</title>
 <meta charset="utf-8" />
+<style type="text/css">
+  .button {
+    display: block;
+    height: 40px;
+    width: 100px;
+    background: #095ab5;
+    color: #fff;
+    text-align: center;
+    font: bold 14px "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif;
+  }
+</style>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
 <script type="text/javascript" src="http://cdn.robotwebtools.org/EventEmitter2/current/eventemitter2.min.js"></script>
 <script type="text/javascript" src="http://cdn.robotwebtools.org/roslibjs/current/roslib.min.js"></script>
 
-<script type="text/javascript" type="text/javascript">
+<script type="text/javascript">
 ;
 $(function() {
 
-  var $stop_loop = false;
+  var $movementLoop;
+  var $leftLoop;
+  var $rightLoop;
 
   var $ros = new ROSLIB.Ros({
     url : 'ws://localhost:9090'
@@ -28,16 +42,26 @@ $(function() {
     console.log('Connection to websocket server closed.');
   });
 
-  var $cmdVel = new ROSLIB.Topic({
-    ros : $ros,
-    name : '/cmd_vel',
-    messageType : 'geometry_msgs/Twist'
-  });
-
   var $vend = new ROSLIB.Topic({
     ros : $ros,
     name : '/vend',
     messageType : 'std_msgs/Bool'
+  });
+
+  var $dovend = new ROSLIB.Message({
+    data : true,
+  });
+
+  $('#actions .vend').on('click', function() {
+    $vend.publish($dovend);
+console.log('vend was called AND WAS executed');
+  });
+
+
+  var $cmdVel = new ROSLIB.Topic({
+    ros : $ros,
+    name : '/cmd_vel',
+    messageType : 'geometry_msgs/Twist'
   });
 
   var $mforward = new ROSLIB.Message({
@@ -56,7 +80,7 @@ $(function() {
   var $tleft = new ROSLIB.Message({
     linear : {
       x : 0.0,
-      y : 90.0,
+      y : 1.0,
       z : 0.0
     },
     angular : {
@@ -69,7 +93,7 @@ $(function() {
   var $tright = new ROSLIB.Message({
     linear : {
       x : 0.0,
-      y : -90.0,
+      y : -1.0,
       z : 0.0
     },
     angular : {
@@ -79,49 +103,43 @@ $(function() {
     }
   });
 
-  var $dovend = new ROSLIB.Message({
-    data : true,
-  });
+  function move_forward(){
+    $cmdVel.publish($mforward);
+console.log('move forward was called AND WAS executed');
+  }
+
+  function turn_left(){
+    $cmdVel.publish($tleft);
+console.log('left turn called AND WAS executed');
+  }
+
+  function turn_right(){
+    $cmdVel.publish($tright);
+console.log('right turn called AND WAS executed');
+  }
 
   $('#actions .move_forward').on('mousedown', function() {
-    while($stop_loop == false){
-      $cmdVel.publish($mforward);
-    }
-    $stop_loop = false;
+console.log('mousedown forward');
+    $movementLoop = setInterval(move_forward(), 200);
   });
 
-  $('#actions .turn_left').on('click', function() {
-    while($stop_loop == false){
-      $cmdVel.publish($tleft);
-    }
-    $stop_loop = false;
+  $('#actions .turn_left').on('mousedown', function() {
+console.log('mousedown left');
+    $leftLoop = setInterval(turn_left(), 200);
   });
   
-  $('#actions .turn_right').on('click', function() {
-    while($stop_loop == false){
-      $cmdVel.publish($tright);
-    }
-    $stop_loop = false;
+  $('#actions .turn_right').on('mousedown', function() {
+console.log('mousedown right');
+    $rightLoop = setInterval(turn_right(), 200);
   });
 
-
-  $('#actions .move_forward').on('mouseup', function() {
-    $stop_loop = true;
-  });
-  $('#actions .move_forward').on('mouseleave', function() {
-    $stop_loop = true;
-  });
-  $('#actions .turn_left').off('click', function() {
-    $stop_loop = true;
+  $('body').on('mouseup', function() {
+console.log('mouseup body');
+    clearInterval($movementLoop);
+    clearInterval($leftLoop);
+    clearInterval($rightLoop);
   });
 
-  $('#actions .turn_right').off('click', function() {
-    $stop_loop = true;
-  });
-
-  $('#actions .vend').on('click', function() {
-    $vend.publish($dovend);
-  });
 });
 </script>
 </head>
@@ -129,11 +147,10 @@ $(function() {
 <body>
   <h1>VendBot</h1>
   <div id='actions'>
-    <a href='#' class='move_forward'>Move Forward</a><br /><br />
-    <a href='#' class='turn_left'>Turn Left</a><br />
-    <a href='#' class='turn_right'>Turn Right</a><br /><br />
-    <a href='#' class='vend'>Vend</a>
+    <div class='move_forward button'>Move Forward</div><br /><br />
+    <div class='turn_left button'>Turn Left</div><br />
+    <div class='turn_right button'>Turn Right</div><br /><br />
+    <div class='vend button'>Vend</div>
   </div>
 </body>
 </html>
-
