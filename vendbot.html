@@ -4,14 +4,21 @@
 <title>VendBot</title>
 <meta charset="utf-8" />
 <style type="text/css">
+  .cb { clear: both; }
   .button {
     display: block;
-    height: 40px;
+    float: left;
+    padding: 10px;
+    margin-right: 10px;
+    height: 25px;
     width: 100px;
     background: #095ab5;
     color: #fff;
     text-align: center;
-    font: bold 14px "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif;
+    font: bold 18px "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif;
+  }
+  .move_forward, .vend {
+    margin-left: 55px;
   }
 </style>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
@@ -118,7 +125,7 @@ console.log('left turn called AND WAS executed');
 console.log('right turn called AND WAS executed');
   }
 
-  $('#actions .move_forward').on('mousedown', function() {
+  $('#actions .move_forward').on('click', function() {
 console.log('mousedown forward');
     $movementLoop = setInterval(move_forward(), 200);
   });
@@ -147,9 +154,12 @@ console.log('mouseup body');
 <body>
   <h1>VendBot</h1>
   <div id='actions'>
-    <div class='move_forward button'>Move Forward</div><br /><br />
-    <div class='turn_left button'>Turn Left</div><br />
-    <div class='turn_right button'>Turn Right</div><br /><br />
+    <div class='move_forward button'>Forward</div>
+    <div class='cb'>&nbsp;</div>
+    <div class='turn_left button'>Left</div>
+    <div class='turn_right button'>Right</div>
+    <div class='cb'>&nbsp;</div>
+    <div class='cb'>&nbsp;</div>
     <div class='vend button'>Vend</div>
   </div>
 </body>
